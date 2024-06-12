@@ -4,20 +4,22 @@ import '../service/ProductsService.dart';
 import 'searchEvents.dart';
 import 'searchStates.dart';
 
+
+List<Product> getProducts=[];
+
 class SearchBloc extends Bloc<SearchEvents,SearchStates>{
   SearchBloc():super(intitalStateSearch()){
 
     on<GetProductsEvent>((event, emit)async {
       emit(LoadingProductState());
-      List<Product> getProducts=await ProductsImp().getProducts();
+      getProducts=await ProductsImp().getProducts();
       emit(AllProductState(products: getProducts));
     });
 
     on<SearchProductEvent>((event, emit) async{
       emit(LoadingProductState());
-      List<Product> getProducts=await ProductsImp().getProducts();
       List<Product> searchProductsList=[];
-      // print(event.productName);
+      print(event.productName);
       getProducts.forEach(
             (element) {
           if (element.title.contains(event.productName)) {
@@ -26,8 +28,10 @@ class SearchBloc extends Bloc<SearchEvents,SearchStates>{
         },
       );
       // print(searchProductsList);
-      if(searchProductsList.isNotEmpty){
+      if(searchProductsList.isNotEmpty && searchProductsList.length<getProducts.length){
         emit(SearchProductState(products:searchProductsList ));
+      }else if( searchProductsList.length==getProducts.length){
+        emit(AllProductState(products: getProducts));
       }else{
         emit(ErrorProductState());
       }
